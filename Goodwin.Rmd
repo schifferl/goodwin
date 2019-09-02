@@ -1,0 +1,125 @@
+---
+title: "Trends in cigarette consumption and time to first cigarette on awakening
+        from 2002 to 2015 in the USA: new insights into the ongoing tobacco
+        epidemic"
+author: "Lucas Schiffer"
+date: "November 1, 2017"
+output:
+  html_document:
+    fig_height: 7
+    fig_retina: NULL
+    code_folding: "hide"
+---
+
+## `knitr` Options
+
+```{r}
+knitr::opts_chunk$set(fig.align = "center")
+knitr::opts_chunk$set(results = "hold")
+```
+
+## `R` Packages
+
+```{r}
+library(readr, warn.conflicts = FALSE)
+library(tidyr, warn.conflicts = FALSE)
+library(ggplot2, warn.conflicts = FALSE)
+library(dplyr, warn.conflicts = FALSE)
+```
+
+## Data Import
+
+```{r}
+table_1 <- read_csv("GoodwinTable1.csv", col_types = "cdddddddddddddd")
+table_2 <- read_csv("GoodwinTable2.csv", col_types = "cdddddddddddddd")
+table_3 <- read_csv("GoodwinTable3.csv", col_types = "cdddddddddddddd")
+```
+
+## Colors / Shapes
+
+```{r}
+colors <- c("#999999", "#56B4E9", "#E69F00", "#0072B2", "#000000")
+shapes <- c(21:25)
+```
+
+## Figure 1
+
+```{r}
+table_1 %>%
+  gather("Year", "Prevalence", 2:15) %>%
+  ggplot(aes(Year, Prevalence, color = `Smoking status`)) +
+  geom_point(aes(shape = `Smoking status`)) +
+  geom_line(aes(group = `Smoking status`, linetype = `Smoking status`)) +
+  guides(color = guide_legend(ncol = 1)) +
+  scale_color_manual(values = colors) +
+  scale_shape_manual(values = shapes) +
+  theme_minimal() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  ggtitle("Prevalence of smoking status from 2002 to 2015",
+          subtitle = "(The National Survey on Drug Use and Health, aged 12+)")
+```
+
+## Figure 2
+
+```{r}
+table_2 %>%
+  gather("Year", "Prevalence", 2:15) %>%
+  mutate(CPD = factor(CPD, levels = unique(CPD))) %>%
+  ggplot(aes(Year, Prevalence, color = CPD)) +
+  geom_point(aes(shape = CPD)) +
+  geom_line(aes(group = CPD, linetype = CPD)) +
+  scale_color_manual(values = colors) +
+  scale_shape_manual(values = shapes) +
+  theme_minimal() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  ggtitle("Prevalence of CPD among current smokers from 2002 to 2015",
+          subtitle = "(The National Survey on Drug Use and Health, aged 12+)")
+```
+
+## Figure 3
+
+```{r}
+subtitle <- "(The National Survey on Drug Use and Health, 2002–15, aged 12+)"
+
+table_3 %>%
+  gather("Year", "Prevalence", 2:15) %>%
+  filter(`Current smokers` == "TTFC (%)" |
+           `Current smokers` == "No TTFC (%)") %>%
+  mutate(`Current smokers` = factor(`Current smokers`,
+                                    levels = unique(`Current smokers`))) %>%
+  ggplot(aes(Year, Prevalence, color = `Current smokers`)) +
+  geom_point(aes(shape = `Current smokers`)) +
+  geom_line(aes(group = `Current smokers`, linetype = `Current smokers`)) +
+  scale_color_manual(values = colors) +
+  scale_shape_manual(values = shapes) +
+  theme_minimal() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  ggtitle("Prevalence of TTFC nicotine dependence among current smokers",
+          subtitle = subtitle)
+```
+
+## Figure 4
+
+```{r}
+table_3 %>%
+  gather("Year", "Prevalence", 2:15) %>%
+  filter(`Current smokers` != "TTFC (%)" &
+           `Current smokers` != "No TTFC (%)") %>%
+  mutate(`Current smokers` = factor(`Current smokers`,
+                                    levels = unique(`Current smokers`))) %>%
+  ggplot(aes(Year, Prevalence, color = `Current smokers`)) +
+  geom_point(aes(shape = `Current smokers`)) +
+  geom_line(aes(group = `Current smokers`, linetype = `Current smokers`)) +
+  scale_color_manual(values = colors) +
+  scale_shape_manual(values = shapes) +
+  theme_minimal() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  ggtitle("Prevalence of TTFC nicotine dependence stratified by number of CPD",
+          subtitle = subtitle)
+```
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
